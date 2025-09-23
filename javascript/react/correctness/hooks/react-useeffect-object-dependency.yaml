@@ -1,0 +1,98 @@
+rules:
+  - id: react-useeffect-object-dependency
+    message: >-
+      Detected a useEffect hook with an object dependency that is recreated on every render.
+      This causes the effect to run repeatedly instead of just once, potentially leading to
+      infinite loops, performance issues, and API overload similar to the Cloudflare outage
+      on September 12, 2025. Objects in dependency arrays are compared by reference using
+      Object.is(), so even identical object contents are treated as "new" dependencies.
+      Consider: 1) Moving the object creation inside the useEffect, 2) Using useMemo to
+      memoize the object, 3) Using primitive values as dependencies instead, or 4) Moving
+      the object outside the component if it never changes.
+    metadata:
+      cwe:
+        - "CWE-835: Loop with Unreachable Exit Condition ('Infinite Loop')"
+        - "CWE-400: Uncontrolled Resource Consumption"
+      owasp:
+        - "A05:2021 - Security Misconfiguration"
+      references:
+        - https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
+        - https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/
+        - https://sngeth.com/react/debugging/2025/09/14/cloudflare-useeffect-outage/
+        - https://react.dev/learn/removing-effect-dependencies
+      category: correctness
+      technology:
+        - react
+      subcategory:
+        - vuln
+      likelihood: HIGH
+      impact: HIGH
+      confidence: HIGH
+      source-rule-url: https://blog.cloudflare.com/deep-dive-into-cloudflares-sept-12-dashboard-and-api-outage/
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    pattern-either:
+      # Pattern 1: Object literal created inline in function component
+      - patterns:
+          - pattern-inside: |
+              function $COMPONENT(...) {
+                ...
+              }
+          - pattern-inside: |
+              const $OBJ = {...};
+              ...
+          - pattern: useEffect($SETUP, [..., $OBJ, ...])
+          - pattern-not-inside: |
+              const $OBJ = useMemo(...);
+              ...
+          - pattern-not-inside: |
+              const $OBJ = useCallback(...);
+              ...
+      # Pattern 2: Object literal created inline in arrow function component
+      - patterns:
+          - pattern-inside: |
+              const $COMPONENT = (...) => {
+                ...
+              }
+          - pattern-inside: |
+              const $OBJ = {...};
+              ...
+          - pattern: useEffect($SETUP, [..., $OBJ, ...])
+          - pattern-not-inside: |
+              const $OBJ = useMemo(...);
+              ...
+          - pattern-not-inside: |
+              const $OBJ = useCallback(...);
+              ...
+      # Pattern 3: Direct object literal in dependency array
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  function $COMPONENT(...) {
+                    ...
+                  }
+              - pattern-inside: |
+                  const $COMPONENT = (...) => {
+                    ...
+                  }
+          - pattern: useEffect($SETUP, [..., {...}, ...])
+      # Pattern 4: Object.assign and similar patterns
+      - patterns:
+          - pattern-either:
+              - pattern-inside: |
+                  function $COMPONENT(...) {
+                    ...
+                  }
+              - pattern-inside: |
+                  const $COMPONENT = (...) => {
+                    ...
+                  }
+          - pattern-inside: |
+              const $OBJ = Object.assign(...);
+              ...
+          - pattern: useEffect($SETUP, [..., $OBJ, ...])
+          - pattern-not-inside: |
+              const $OBJ = useMemo(...);
+              ...
