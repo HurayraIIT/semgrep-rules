@@ -20,7 +20,7 @@ rules:
       properly.
     paths:
       include:
-        - '**/wp-content/plugins/**/*.php'
+        - '**/*.php'
     languages:
       - php
     severity: WARNING

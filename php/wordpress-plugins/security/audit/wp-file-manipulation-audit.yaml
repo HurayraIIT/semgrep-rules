@@ -9,7 +9,7 @@ rules:
       functions are user controlled. Use these functions carefully.
     paths:
       include:
-        - '**/wp-content/plugins/**/*.php'
+        - '**/*.php'
     languages:
       - php
     severity: WARNING

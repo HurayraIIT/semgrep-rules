@@ -12,7 +12,7 @@ rules:
       properly before passing it to these functions.
     paths:
       include:
-        - '**/wp-content/plugins/**/*.php'
+        - '**/*.php'
     languages:
       - php
     severity: WARNING

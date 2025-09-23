@@ -6,7 +6,7 @@ rules:
       cause the script to die, making the check useless.
     paths:
       include:
-        - '**/wp-content/plugins/**/*.php'
+        - '**/*.php'
     languages:
       - php
     severity: WARNING
